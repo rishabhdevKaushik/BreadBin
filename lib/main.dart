@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Expense Tracker',
+      title: 'Bread Bin',
       theme: AppTheme.darkTheme,
       home: const ExpenseHomePage(),
       debugShowCheckedModeBanner: false,

@@ -4,7 +4,6 @@ import 'theme.dart';
 class InputArea extends StatefulWidget {
   final double total;
   final String input;
-  // final VoidCallback onMinusTap;
   final VoidCallback onPlusOptionTap;
   final VoidCallback onMinusOptionTap;
 
@@ -12,7 +11,6 @@ class InputArea extends StatefulWidget {
     super.key,
     required this.total,
     required this.input,
-    // required this.onMinusTap,
     required this.onPlusOptionTap,
     required this.onMinusOptionTap,
   });
@@ -71,12 +69,11 @@ class _InputAreaState extends State<InputArea> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // - pill with popup
+                // Minus/Plus pill with popup menu
                 SizedBox(
                   height: 56,
                   child: Center(
                     child: MinusPill(
-                      // onMinusTap: widget.onMinusTap,
                       onPlusOptionTap: widget.onPlusOptionTap,
                       onMinusOptionTap: widget.onMinusOptionTap,
                       onMenuSelected: _handleMenuSelected,
@@ -87,7 +84,7 @@ class _InputAreaState extends State<InputArea> {
                     ),
                   ),
                 ),
-                // Input display
+                // Input display with formatted input string
                 SizedBox(
                   height: 72,
                   child: Center(
@@ -102,7 +99,6 @@ class _InputAreaState extends State<InputArea> {
                       alignment: Alignment.center,
                       child: Builder(
                         builder: (context) {
-                          // Format input to only allow two digits after the decimal point
                           String formattedInput = widget.input;
                           if (formattedInput.contains('.')) {
                             final parts = formattedInput.split('.');
@@ -115,18 +111,15 @@ class _InputAreaState extends State<InputArea> {
                                   (decimals.isNotEmpty ? '.$decimals' : '.');
                             }
                           }
-                          // Remove any extra decimals
                           if ('.'.allMatches(formattedInput).length > 1) {
                             formattedInput = formattedInput.replaceFirst(
                               '.',
                               '',
                             );
                           }
-                          // Special case: if input is just '.' show '0.'
                           if (formattedInput == '.') {
                             formattedInput = '0.';
                           }
-                          // Determine font size based on input length (excluding decimal point)
                           int digitCount = formattedInput
                               .replaceAll('.', '')
                               .length;
@@ -159,7 +152,6 @@ class _InputAreaState extends State<InputArea> {
 }
 
 class MinusPill extends StatelessWidget {
-  // final VoidCallback onMinusTap;
   final VoidCallback onPlusOptionTap;
   final VoidCallback onMinusOptionTap;
   final void Function(int) onMenuSelected;
@@ -168,7 +160,6 @@ class MinusPill extends StatelessWidget {
 
   const MinusPill({
     super.key,
-    // required this.onMinusTap,
     required this.onPlusOptionTap,
     required this.onMinusOptionTap,
     required this.onMenuSelected,
@@ -188,7 +179,7 @@ class MinusPill extends StatelessWidget {
           child: Row(
             children: [
               Icon(Icons.add, color: AppTheme.income),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text('Income', style: TextStyle(color: AppTheme.textPrimary)),
             ],
           ),
@@ -198,7 +189,7 @@ class MinusPill extends StatelessWidget {
           child: Row(
             children: [
               Icon(Icons.remove, color: AppTheme.expense),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text('Expense', style: TextStyle(color: AppTheme.textPrimary)),
             ],
           ),

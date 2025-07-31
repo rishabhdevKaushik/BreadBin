@@ -52,3 +52,6 @@ app.*.map.json
 
 # vscode settings
 .vscode/
+
+# Readme files
+README.md
