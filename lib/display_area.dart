@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'history_area.dart';
 import 'input_area.dart';
 import 'theme.dart';
+import 'transaction.dart';
 
 class DisplayArea extends StatefulWidget {
   final double total;
@@ -12,6 +13,10 @@ class DisplayArea extends StatefulWidget {
   final VoidCallback onExpand;
   final VoidCallback onCollapse;
 
+  // Added new parameters to receive transaction history and scroll controller
+  final List<TransactionEntry> transactionHistory;
+  final ScrollController historyScrollController;
+
   const DisplayArea({
     super.key,
     required this.total,
@@ -21,13 +26,16 @@ class DisplayArea extends StatefulWidget {
     required this.expanded,
     required this.onExpand,
     required this.onCollapse,
+    required this.transactionHistory,
+    required this.historyScrollController,
   });
 
   @override
   State<DisplayArea> createState() => _DisplayAreaState();
 }
 
-class _DisplayAreaState extends State<DisplayArea> with SingleTickerProviderStateMixin {
+class _DisplayAreaState extends State<DisplayArea>
+    with SingleTickerProviderStateMixin {
   double _dragOffset = 0.0;
   bool _isDragging = false;
   late double _collapsedHeight;
@@ -35,22 +43,21 @@ class _DisplayAreaState extends State<DisplayArea> with SingleTickerProviderStat
   AnimationController? _animationController;
   Animation<double>? _heightAnimation;
 
-  late final ScrollController _historyScrollController;
-
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 150),
     );
-    _heightAnimation = Tween<double>(begin: 0, end: 0).animate(_animationController!);
-    _historyScrollController = ScrollController();
+    _heightAnimation = Tween<double>(
+      begin: 0,
+      end: 0,
+    ).animate(_animationController!);
   }
 
   @override
   void dispose() {
-    _historyScrollController.dispose();
     _animationController?.dispose();
     super.dispose();
   }
@@ -73,7 +80,10 @@ class _DisplayAreaState extends State<DisplayArea> with SingleTickerProviderStat
     double velocity = details.primaryVelocity ?? 0.0;
     double threshold = (_expandedHeight - _collapsedHeight) / 2;
     double currentHeight = widget.expanded ? _expandedHeight : _collapsedHeight;
-    double newHeight = (currentHeight + _dragOffset).clamp(_collapsedHeight, _expandedHeight);
+    double newHeight = (currentHeight + _dragOffset).clamp(
+      _collapsedHeight,
+      _expandedHeight,
+    );
 
     bool shouldExpand;
     if (velocity > 700) {
@@ -93,10 +103,13 @@ class _DisplayAreaState extends State<DisplayArea> with SingleTickerProviderStat
     double targetHeight = shouldExpand ? _expandedHeight : _collapsedHeight;
 
     if (_animationController != null) {
-      _heightAnimation = Tween<double>(begin: newHeight, end: targetHeight).animate(_animationController!)
-        ..addListener(() {
-          setState(() {});
-        });
+      _heightAnimation =
+          Tween<double>(
+            begin: newHeight,
+            end: targetHeight,
+          ).animate(_animationController!)..addListener(() {
+            setState(() {});
+          });
       _animationController!.reset();
       _animationController!.forward();
     }
@@ -114,7 +127,10 @@ class _DisplayAreaState extends State<DisplayArea> with SingleTickerProviderStat
 
     if (_isDragging) {
       double base = widget.expanded ? _expandedHeight : _collapsedHeight;
-      double newHeight = (base + _dragOffset).clamp(_collapsedHeight, _expandedHeight);
+      double newHeight = (base + _dragOffset).clamp(
+        _collapsedHeight,
+        _expandedHeight,
+      );
       return newHeight;
     } else if (_animationController != null &&
         _animationController!.isAnimating &&
@@ -127,7 +143,9 @@ class _DisplayAreaState extends State<DisplayArea> with SingleTickerProviderStat
 
   double _getExpandProgress(double displayHeight) {
     if (_expandedHeight == _collapsedHeight) return 0.0;
-    return ((displayHeight - _collapsedHeight) / (_expandedHeight - _collapsedHeight)).clamp(0.0, 1.0);
+    return ((displayHeight - _collapsedHeight) /
+            (_expandedHeight - _collapsedHeight))
+        .clamp(0.0, 1.0);
   }
 
   @override
@@ -138,7 +156,10 @@ class _DisplayAreaState extends State<DisplayArea> with SingleTickerProviderStat
 
     return AnimatedContainer(
       duration: Duration(
-        milliseconds: _isDragging || (_animationController?.isAnimating ?? false) ? 0 : 300,
+        milliseconds:
+            _isDragging || (_animationController?.isAnimating ?? false)
+            ? 0
+            : 300,
       ),
       height: displayHeight,
       curve: Curves.ease,
@@ -164,10 +185,10 @@ class _DisplayAreaState extends State<DisplayArea> with SingleTickerProviderStat
                       opacity: progress <= 0.0
                           ? 1.0
                           : (progress < 0.45
-                              ? (1.0 - (progress / 0.45) * 0.7)
-                              : (progress < 0.55
-                                  ? (0.3 - ((progress - 0.45) / 0.10) * 0.3)
-                                  : 0.0)),
+                                ? (1.0 - (progress / 0.45) * 0.7)
+                                : (progress < 0.55
+                                      ? (0.3 - ((progress - 0.45) / 0.10) * 0.3)
+                                      : 0.0)),
                       child: Transform.translate(
                         offset: Offset(0, slideDistance * progress),
                         child: IgnorePointer(
@@ -187,17 +208,18 @@ class _DisplayAreaState extends State<DisplayArea> with SingleTickerProviderStat
                       opacity: progress < 0.45
                           ? 0.0
                           : (progress < 0.55
-                              ? ((progress - 0.45) / 0.10 * 0.3)
-                              : (progress < 1.0
-                                  ? (0.3 + ((progress - 0.55) / 0.45) * 0.7)
-                                  : 1.0)),
+                                ? ((progress - 0.45) / 0.10 * 0.3)
+                                : (progress < 1.0
+                                      ? (0.3 + ((progress - 0.55) / 0.45) * 0.7)
+                                      : 1.0)),
                       child: Transform.translate(
                         offset: Offset(0, -slideDistance * (1.0 - progress)),
                         child: IgnorePointer(
                           ignoring: progress < 0.45,
                           child: SizedBox.expand(
                             child: HistoryArea(
-                              scrollController: _historyScrollController,
+                              transactions: widget.transactionHistory,
+                              scrollController: widget.historyScrollController,
                               onCollapse: widget.onCollapse,
                             ),
                           ),

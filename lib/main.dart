@@ -3,6 +3,7 @@ import 'theme.dart';
 import 'display_area.dart';
 import 'numpad_area.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'transaction.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,8 +23,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-enum TransactionType { income, expense }
-
 class ExpenseHomePage extends StatefulWidget {
   const ExpenseHomePage({super.key});
 
@@ -32,6 +31,9 @@ class ExpenseHomePage extends StatefulWidget {
 }
 
 class _ExpenseHomePageState extends State<ExpenseHomePage> {
+  List<TransactionEntry> _transactionHistory = [];
+  final ScrollController _historyScrollController = ScrollController();
+
   double _total = 0.0;
   String _input = '0';
   TransactionType _type = TransactionType.expense;
@@ -41,6 +43,27 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
   void initState() {
     super.initState();
     _loadTotal();
+    _loadTransactions();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_historyScrollController.hasClients) {
+        _historyScrollController.animateTo(
+          _historyScrollController.position.minScrollExtent,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  Future<void> _loadTransactions() async {
+    final loaded = await loadTransactions();
+    setState(() {
+      _transactionHistory = loaded;
+    });
+    _scrollToBottom();
   }
 
   Future<void> _loadTotal() async {
@@ -64,7 +87,7 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
         if (_input.contains('.')) {
           final parts = _input.split('.');
           if (parts.length > 1 && parts[1].length >= 2) {
-            // If already 2 digits after decimal, ignore further input
+            // Already 2 digits after decimal, ignore further input
             return;
           }
         }
@@ -91,8 +114,26 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
     });
   }
 
-  void _onAddPressed() {
+  void _onAddPressed() async {
     double value = double.tryParse(_input) ?? 0.0;
+
+    if (value == 0.0) {
+      return; // Ignore zero entries
+    }
+
+    final now = DateTime.now();
+
+    final newEntry = TransactionEntry(
+      amount: value,
+      tags: [], // Add UI to collect tags in future if required
+      type: _type,
+      dateTime: now,
+    );
+
+    List<TransactionEntry> currentTransactions = await loadTransactions();
+    currentTransactions.add(newEntry);
+    await saveTransactions(currentTransactions);
+
     setState(() {
       if (_type == TransactionType.income) {
         _total += value;
@@ -100,13 +141,11 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
         _total -= value;
       }
       _input = '0';
+      _transactionHistory.add(newEntry);
     });
     _saveTotal();
+    _scrollToBottom();
   }
-
-  // void _onMinusTap() {
-  //   // Not used, handled by popup
-  // }
 
   void _onPlusOptionTap() {
     setState(() {
@@ -140,7 +179,6 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
         builder: (context, constraints) {
           return Stack(
             children: [
-              // NumpadArea positioned at the bottom
               Positioned(
                 bottom: 12,
                 left: 0,
@@ -152,10 +190,7 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                   onBackspacePressed: _onBackspacePressed,
                 ),
               ),
-
-              // DisplayArea positioned at the top
               Positioned(
-                // duration: const Duration(milliseconds: 300),
                 top: 0,
                 left: 0,
                 right: 0,
@@ -167,6 +202,8 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                   expanded: _displayExpanded,
                   onExpand: _expandDisplay,
                   onCollapse: _collapseDisplay,
+                  transactionHistory: _transactionHistory,
+                  historyScrollController: _historyScrollController,
                 ),
               ),
             ],
