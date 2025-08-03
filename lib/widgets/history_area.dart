@@ -44,11 +44,9 @@ class _HistoryAreaState extends State<HistoryArea> {
   @override
   void didUpdateWidget(covariant HistoryArea oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.transactions != widget.transactions) {
-      setState(() {
-        grouped = groupTransactionsByDayAndMonth(widget.transactions);
-      });
-    }
+    setState(() {
+      grouped = groupTransactionsByDayAndMonth(widget.transactions);
+    });
   }
 
   @override
