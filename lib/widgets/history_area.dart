@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:sliver_tools/sliver_tools.dart';
+
 import '../transaction.dart';
 import '../utils/history_grouping.dart';
 import '../theme.dart';
@@ -22,14 +24,16 @@ class HistoryArea extends StatefulWidget {
 }
 
 class _HistoryAreaState extends State<HistoryArea> {
+  late List<MonthGroup> grouped;
+
   @override
   void initState() {
     super.initState();
+    grouped = groupTransactionsByDayAndMonth(widget.transactions);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // await Future.delayed(const Duration(milliseconds: 100));
-
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.scrollController.hasClients) {
+        // Scroll to bottom on initial load
         widget.scrollController.jumpTo(
           widget.scrollController.position.maxScrollExtent,
         );
@@ -38,36 +42,50 @@ class _HistoryAreaState extends State<HistoryArea> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final grouped = groupTransactionsByDayAndMonth(widget.transactions);
+  void didUpdateWidget(covariant HistoryArea oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.transactions != widget.transactions) {
+      setState(() {
+        grouped = groupTransactionsByDayAndMonth(widget.transactions);
+      });
+    }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     if (grouped.isEmpty) {
       return const Center(child: Text("No history yet"));
     }
 
     return Stack(
       children: [
-        CustomScrollView(
-          controller: widget.scrollController,
-          slivers: [
-            for (final month in grouped) ...[
-              SliverStickyHeader(
-                header: _buildMonthHeader(month.monthSummary),
-                sliver: const SliverToBoxAdapter(child: SizedBox.shrink()),
-              ),
-              for (final day in month.days)
+        SafeArea(
+          child: CustomScrollView(
+            controller: widget.scrollController,
+            slivers: [
+              // For each month, a sticky header that wraps day sticky headers
+              for (final month in grouped)
                 SliverStickyHeader(
-                  header: _buildDayHeader(day.daySummary),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) =>
-                          _buildTransactionTile(day.transactions[index]),
-                      childCount: day.transactions.length,
-                    ),
+                  header: _buildMonthHeader(month.monthSummary),
+                  sliver: MultiSliver(
+                    children: [
+                      for (final day in month.days)
+                        SliverStickyHeader(
+                          header: _buildDayHeader(day.daySummary),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) => _buildTransactionTile(
+                                day.transactions[index],
+                              ),
+                              childCount: day.transactions.length,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
             ],
-          ],
+          ),
         ),
         ScrollToBottomFAB(scrollController: widget.scrollController),
       ],
@@ -86,6 +104,7 @@ class _HistoryAreaState extends State<HistoryArea> {
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
+          fontSize: 18,
         ),
       ),
     );
@@ -100,7 +119,11 @@ class _HistoryAreaState extends State<HistoryArea> {
         "${_dateBuilder(day)} | "
         "Income ₹${day.income.toStringAsFixed(0)}, "
         "Expense ₹${day.expense.toStringAsFixed(0)}",
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
+        ),
       ),
     );
   }
@@ -139,7 +162,7 @@ class _HistoryAreaState extends State<HistoryArea> {
   String _monthName(int month) {
     const months = [
       "January",
-      "Febuary",
+      "February",
       "March",
       "April",
       "May",
@@ -160,14 +183,12 @@ class _HistoryAreaState extends State<HistoryArea> {
     final yesterday = today.subtract(const Duration(days: 1));
     final current = DateTime(day.date.year, day.date.month, day.date.day);
 
-    String label;
     if (current == today) {
-      label = "Today";
+      return "Today";
     } else if (current == yesterday) {
-      label = "Yesterday";
+      return "Yesterday";
     } else {
-      label = "${day.date.day} ${_monthName(day.date.month)}";
+      return "${day.date.day} ${_monthName(day.date.month)}";
     }
-    return label;
   }
 }
