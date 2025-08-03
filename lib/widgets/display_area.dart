@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'history_area.dart';
 import 'input_area.dart';
-import 'theme.dart';
-import 'transaction.dart';
+import '../theme.dart';
+import '../transaction.dart';
 
 class DisplayArea extends StatefulWidget {
   final double total;

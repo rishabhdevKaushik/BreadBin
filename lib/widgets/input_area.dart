@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'theme.dart';
+import '../theme.dart';
 
 class InputArea extends StatefulWidget {
   final double total;
@@ -171,6 +171,7 @@ class MinusPill extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopupMenuButton<int>(
       color: AppTheme.surface,
+      tooltip: 'Change type',
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       onSelected: onMenuSelected,
       itemBuilder: (context) => [

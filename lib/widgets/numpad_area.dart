@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'theme.dart';
+import '../theme.dart';
 
 typedef NumpadButtonCallback = void Function(String value);
 typedef AddCallback = void Function();

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'theme.dart';
-import 'display_area.dart';
-import 'numpad_area.dart';
+import 'widgets/display_area.dart';
+import 'widgets/numpad_area.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'transaction.dart';
 
@@ -50,8 +50,8 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_historyScrollController.hasClients) {
         _historyScrollController.animateTo(
-          _historyScrollController.position.minScrollExtent,
-          duration: const Duration(milliseconds: 150),
+          _historyScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 100),
           curve: Curves.easeOut,
         );
       }
