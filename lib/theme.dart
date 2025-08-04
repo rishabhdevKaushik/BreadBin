@@ -17,8 +17,9 @@ class AppTheme {
     brightness: Brightness.dark,
     scaffoldBackgroundColor: background,
     primaryColor: accent,
+    fontFamily: 'Manrope',
     colorScheme: ColorScheme.dark(
-      background: background,
+      // background: background,
       surface: surface,
       primary: accent,
       secondary: accent,

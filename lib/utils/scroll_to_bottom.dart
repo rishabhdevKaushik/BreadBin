@@ -1,6 +1,7 @@
 // /utils/scroll_to_bottom.dart
 
 import 'package:flutter/material.dart';
+import '../theme.dart';
 
 class ScrollToBottomFAB extends StatefulWidget {
   final ScrollController scrollController;
@@ -43,17 +44,23 @@ class _ScrollToBottomFABState extends State<ScrollToBottomFAB> {
     return Positioned(
       right: 16,
       bottom: 16,
-      child: FloatingActionButton(
-        mini: true,
-        tooltip: 'Scroll to latest',
-        onPressed: () {
-          widget.scrollController.animateTo(
-            widget.scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        },
-        child: const Icon(Icons.arrow_downward),
+      child: SizedBox(
+        width: 70, // Increase width
+        height: 70, // Increase height
+        child: FloatingActionButton(
+          mini: true,
+          tooltip: 'Scroll to latest',
+          backgroundColor: AppTheme.pill,
+          foregroundColor: AppTheme.textPrimary,
+          onPressed: () {
+            widget.scrollController.animateTo(
+              widget.scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          },
+          child: const Icon(Icons.arrow_downward),
+        ),
       ),
     );
   }

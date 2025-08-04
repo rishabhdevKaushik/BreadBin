@@ -92,17 +92,45 @@ class _HistoryAreaState extends State<HistoryArea> {
 
   Widget _buildMonthHeader(MonthSummaryHeader month) {
     return Container(
-      color: Colors.blue.shade700,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      alignment: Alignment.centerLeft,
-      child: Text(
-        "${_monthName(month.month)} ${month.year} | "
-        "Income ₹${month.income.toStringAsFixed(0)}, "
-        "Expense ₹${month.expense.toStringAsFixed(0)}",
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
+      color: AppTheme.surface,
+      child: Container(
+        margin: EdgeInsets.only(left: 16, right: 16, bottom: 8),
+        decoration: BoxDecoration(
+          color: AppTheme.pill,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        alignment: Alignment.centerLeft,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "${_monthName(month.month)} ${month.year}",
+              style: TextStyle(
+                color: AppTheme.textPrimary,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            RichText(
+              text: TextSpan(
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+                children: [
+                  TextSpan(
+                    text: "+ ₹${month.income.toStringAsFixed(0)}  ",
+                    style: TextStyle(color: AppTheme.income),
+                  ),
+                  TextSpan(
+                    text: "- ₹${month.expense.toStringAsFixed(0)}",
+                    style: TextStyle(color: AppTheme.expense),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -110,18 +138,37 @@ class _HistoryAreaState extends State<HistoryArea> {
 
   Widget _buildDayHeader(DaySummary day) {
     return Container(
-      color: Colors.blue.shade300,
+      color: AppTheme.surface,
+      margin: EdgeInsets.only(left: 8, right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       alignment: Alignment.centerLeft,
-      child: Text(
-        "${_dateBuilder(day)} | "
-        "Income ₹${day.income.toStringAsFixed(0)}, "
-        "Expense ₹${day.expense.toStringAsFixed(0)}",
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-          fontSize: 16,
-        ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            _dateBuilder(day),
+            style: TextStyle(
+              color: AppTheme.textPrimary,
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+            ),
+          ),
+          RichText(
+            text: TextSpan(
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              children: [
+                TextSpan(
+                  text: "+ ₹${day.income.toStringAsFixed(0)}   ",
+                  style: TextStyle(color: AppTheme.income),
+                ),
+                TextSpan(
+                  text: "- ₹${day.expense.toStringAsFixed(0)}",
+                  style: TextStyle(color: AppTheme.expense),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -131,29 +178,43 @@ class _HistoryAreaState extends State<HistoryArea> {
     final formattedTime =
         '${localDateTime.hour.toString().padLeft(2, '0')}:${localDateTime.minute.toString().padLeft(2, '0')}';
 
-    return ListTile(
-      leading: Icon(
-        txn.type == TransactionType.income
-            ? Icons.arrow_downward
-            : Icons.arrow_upward,
-        color: txn.type == TransactionType.income
-            ? AppTheme.income
-            : AppTheme.expense,
-      ),
-      title: Text(
-        '₹${txn.amount.toStringAsFixed(2)}',
-        style: TextStyle(
-          color: txn.type == TransactionType.income
-              ? AppTheme.income
-              : AppTheme.expense,
-          fontWeight: FontWeight.bold,
+    return Container(
+      margin: EdgeInsets.only(left: 8, right: 8),
+      child: ListTile(
+        // leading: Icon(
+        //   txn.type == TransactionType.income
+        //       ? Icons.arrow_downward
+        //       : Icons.arrow_upward,
+        //   color: txn.type == TransactionType.income
+        //       ? AppTheme.income
+        //       : AppTheme.expense,
+        // ),
+        title: Text(
+          '${txn.type == TransactionType.income ? '+' : ''} ₹ ${txn.amount.toStringAsFixed(2)}',
+          style: TextStyle(
+            color: txn.type == TransactionType.income
+                ? AppTheme.income
+                : AppTheme.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
         ),
+        subtitle: Text(
+          txn.tags.join(", "),
+          style: TextStyle(color: AppTheme.textSecondary),
+        ),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end, // Right align time text
+          children: [
+            Text(
+              formattedTime,
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+            ),
+          ],
+        ),
+        // isThreeLine: false,
       ),
-      subtitle: Text(
-        '$formattedTime\n${txn.tags.join(", ")}',
-        style: TextStyle(color: AppTheme.textSecondary),
-      ),
-      isThreeLine: true,
     );
   }
 
