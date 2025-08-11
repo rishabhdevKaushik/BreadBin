@@ -6,6 +6,7 @@ class InputArea extends StatefulWidget {
   final String input;
   final VoidCallback onPlusOptionTap;
   final VoidCallback onMinusOptionTap;
+  final Function(List<String>) onTagsChanged;
 
   const InputArea({
     super.key,
@@ -13,6 +14,7 @@ class InputArea extends StatefulWidget {
     required this.input,
     required this.onPlusOptionTap,
     required this.onMinusOptionTap,
+    required this.onTagsChanged,
   });
 
   @override
@@ -21,6 +23,14 @@ class InputArea extends StatefulWidget {
 
 class _InputAreaState extends State<InputArea> {
   bool _isIncome = false;
+  final List<String> _tags = [];
+  final TextEditingController _tagController = TextEditingController();
+  final ScrollController _tagsScrollController = ScrollController();
+  bool _isAddingTag = false;
+
+  void _notifyParent() {
+    widget.onTagsChanged(List.from(_tags));
+  }
 
   void _handleMenuSelected(int value) {
     setState(() {
@@ -34,10 +44,48 @@ class _InputAreaState extends State<InputArea> {
     });
   }
 
+  void _addTag(String tag) {
+    if (tag.trim().isEmpty) return;
+    setState(() {
+      _tags.add(tag.trim());
+    });
+    _notifyParent();
+    _tagController.clear();
+
+    // Scroll to the end after short delay for layout
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_tagsScrollController.hasClients) {
+        _tagsScrollController.animateTo(
+          _tagsScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  void _removeTag(String tag) {
+    setState(() {
+      _tags.remove(tag);
+    });
+    _notifyParent();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_tagsScrollController.hasClients) {
+        _tagsScrollController.animateTo(
+          _tagsScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Total Display
         Padding(
           padding: EdgeInsets.only(
             top: MediaQuery.of(context).padding.top + 12,
@@ -61,15 +109,16 @@ class _InputAreaState extends State<InputArea> {
           ),
         ),
         const Spacer(),
+
+        /// Main Row
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
           child: SizedBox(
-            height: 72, // Fixed height for both pill and input
+            height: 140,
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                // Minus/Plus pill with popup menu
+                // Left Minus/Plus pill
                 SizedBox(
                   height: 56,
                   child: Center(
@@ -81,23 +130,19 @@ class _InputAreaState extends State<InputArea> {
                       symbolColor: _isIncome
                           ? AppTheme.income
                           : AppTheme.expense,
+                      isIncomeSelected: _isIncome,
                     ),
                   ),
                 ),
-                // Input display with formatted input string
-                SizedBox(
-                  height: 72,
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 0,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      alignment: Alignment.center,
-                      child: Builder(
+                const SizedBox(width: 16),
+
+                // Right Column (amount + tags)
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // Amount display
+                      Builder(
                         builder: (context) {
                           String formattedInput = widget.input;
                           if (formattedInput.contains('.')) {
@@ -139,7 +184,103 @@ class _InputAreaState extends State<InputArea> {
                           );
                         },
                       ),
-                    ),
+                      const SizedBox(height: 8),
+
+                      // Horizontal scroll tags + add button
+                      Expanded(
+                        child: SingleChildScrollView(
+                          controller: _tagsScrollController,
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              ..._tags.map(
+                                (tag) => Padding(
+                                  padding: const EdgeInsets.only(right: 8.0),
+                                  child: SizedBox(
+                                    height: 44,
+                                    child: Chip(
+                                      label: Text(tag),
+                                      backgroundColor: AppTheme.pill,
+                                      shape: const StadiumBorder(
+                                        side: BorderSide(
+                                          style: BorderStyle.none,
+                                        ),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ),
+                                      labelStyle: TextStyle(
+                                        color: AppTheme.textPrimary,
+                                      ),
+                                      onDeleted: () => _removeTag(tag),
+                                      deleteIconColor: AppTheme.textPrimary
+                                          .withValues(alpha: 0.6),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              // Add tag pill at right
+                              GestureDetector(
+                                onTap: () =>
+                                    setState(() => _isAddingTag = true),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 250),
+                                  curve: Curves.easeInOut,
+                                  width: _isAddingTag ? 100 : 68,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.pill,
+                                    borderRadius: BorderRadius.circular(24),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 4,
+                                  ),
+                                  child: _isAddingTag
+                                      ? TextField(
+                                          controller: _tagController,
+                                          autofocus: true,
+                                          decoration: InputDecoration(
+                                            hintText: 'Tag',
+                                            hintStyle: TextStyle(
+                                              color: AppTheme.textPrimary
+                                                  .withValues(alpha: 0.6),
+                                            ),
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                  horizontal: 8,
+                                                  vertical: 9,
+                                                ),
+                                            border: InputBorder.none,
+                                          ),
+                                          style: TextStyle(
+                                            color: AppTheme.textPrimary,
+                                          ),
+                                          onSubmitted: (value) {
+                                            _addTag(value);
+                                            setState(
+                                              () => _isAddingTag = false,
+                                            );
+                                          },
+                                          onEditingComplete: () => setState(
+                                            () => _isAddingTag = false,
+                                          ),
+                                        )
+                                      : Center(
+                                          child: Icon(
+                                            Icons.local_offer,
+                                            color: AppTheme.textSecondary,
+                                            size: 28,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -157,6 +298,7 @@ class MinusPill extends StatelessWidget {
   final void Function(int) onMenuSelected;
   final String symbol;
   final Color symbolColor;
+  final bool isIncomeSelected;
 
   const MinusPill({
     super.key,
@@ -165,6 +307,7 @@ class MinusPill extends StatelessWidget {
     required this.onMenuSelected,
     required this.symbol,
     required this.symbolColor,
+    required this.isIncomeSelected,
   });
 
   @override
@@ -177,27 +320,65 @@ class MinusPill extends StatelessWidget {
       itemBuilder: (context) => [
         PopupMenuItem(
           value: 1,
-          child: Row(
-            children: [
-              Icon(Icons.add, color: AppTheme.income),
-              const SizedBox(width: 8),
-              Text('Income', style: TextStyle(color: AppTheme.textPrimary)),
-            ],
+          padding: EdgeInsets.zero,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: isIncomeSelected
+                  ? AppTheme.income.withValues(alpha: 0.15)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.add, color: AppTheme.income),
+                const SizedBox(width: 8),
+                Text(
+                  'Income',
+                  style: TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontWeight: isIncomeSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         PopupMenuItem(
           value: -1,
-          child: Row(
-            children: [
-              Icon(Icons.remove, color: AppTheme.expense),
-              const SizedBox(width: 8),
-              Text('Expense', style: TextStyle(color: AppTheme.textPrimary)),
-            ],
+          padding: EdgeInsets.zero,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: !isIncomeSelected
+                  ? AppTheme.expense.withValues(alpha: 0.15)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.remove, color: AppTheme.expense),
+                const SizedBox(width: 8),
+                Text(
+                  'Expense',
+                  style: TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontWeight: !isIncomeSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 6),
         decoration: BoxDecoration(
           color: AppTheme.pill,
           borderRadius: BorderRadius.circular(24),

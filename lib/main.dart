@@ -39,6 +39,9 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
   TransactionType _type = TransactionType.expense;
   bool _displayExpanded = false;
 
+  // NEW: store tags from InputArea
+  List<String> _currentTags = [];
+
   @override
   void initState() {
     super.initState();
@@ -83,11 +86,9 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
       if (_input == '0') {
         _input = value;
       } else {
-        // Prevent more than 2 digits after decimal
         if (_input.contains('.')) {
           final parts = _input.split('.');
           if (parts.length > 1 && parts[1].length >= 2) {
-            // Already 2 digits after decimal, ignore further input
             return;
           }
         }
@@ -116,16 +117,13 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
 
   void _onAddPressed() async {
     double value = double.tryParse(_input) ?? 0.0;
-
-    if (value == 0.0) {
-      return; // Ignore zero entries
-    }
+    if (value == 0.0) return;
 
     final now = DateTime.now();
 
     final newEntry = TransactionEntry(
       amount: value,
-      tags: [], // Add UI to collect tags in future if required
+      tags: _currentTags, // ✅ attach current tags
       type: _type,
       dateTime: now,
     );
@@ -142,6 +140,7 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
       }
       _input = '0';
       _transactionHistory.add(newEntry);
+      _currentTags = []; // clear tags after saving
     });
     _saveTotal();
     _scrollToBottom();
@@ -204,6 +203,11 @@ class _ExpenseHomePageState extends State<ExpenseHomePage> {
                   onCollapse: _collapseDisplay,
                   transactionHistory: _transactionHistory,
                   historyScrollController: _historyScrollController,
+
+                  // NEW: pass tags change handler
+                  onTagsChanged: (tags) {
+                    _currentTags = List.from(tags);
+                  },
                 ),
               ),
             ],

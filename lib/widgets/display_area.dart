@@ -12,10 +12,11 @@ class DisplayArea extends StatefulWidget {
   final bool expanded;
   final VoidCallback onExpand;
   final VoidCallback onCollapse;
-
-  // Added new parameters to receive transaction history and scroll controller
   final List<TransactionEntry> transactionHistory;
   final ScrollController historyScrollController;
+
+  // ✅ new
+  final Function(List<String>) onTagsChanged;
 
   const DisplayArea({
     super.key,
@@ -28,6 +29,7 @@ class DisplayArea extends StatefulWidget {
     required this.onCollapse,
     required this.transactionHistory,
     required this.historyScrollController,
+    required this.onTagsChanged,
   });
 
   @override
@@ -103,13 +105,10 @@ class _DisplayAreaState extends State<DisplayArea>
     double targetHeight = shouldExpand ? _expandedHeight : _collapsedHeight;
 
     if (_animationController != null) {
-      _heightAnimation =
-          Tween<double>(
-            begin: newHeight,
-            end: targetHeight,
-          ).animate(_animationController!)..addListener(() {
-            setState(() {});
-          });
+      _heightAnimation = Tween<double>(
+        begin: newHeight,
+        end: targetHeight,
+      ).animate(_animationController!)..addListener(() => setState(() {}));
       _animationController!.reset();
       _animationController!.forward();
     }
@@ -120,21 +119,14 @@ class _DisplayAreaState extends State<DisplayArea>
   }
 
   double _getDisplayHeight(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final totalHeight = mediaQuery.size.height;
+    final totalHeight = MediaQuery.of(context).size.height;
     _collapsedHeight = totalHeight * 0.55;
     _expandedHeight = totalHeight * 0.95;
 
     if (_isDragging) {
       double base = widget.expanded ? _expandedHeight : _collapsedHeight;
-      double newHeight = (base + _dragOffset).clamp(
-        _collapsedHeight,
-        _expandedHeight,
-      );
-      return newHeight;
-    } else if (_animationController != null &&
-        _animationController!.isAnimating &&
-        _heightAnimation != null) {
+      return (base + _dragOffset).clamp(_collapsedHeight, _expandedHeight);
+    } else if (_animationController!.isAnimating) {
       return _heightAnimation!.value;
     } else {
       return widget.expanded ? _expandedHeight : _collapsedHeight;
@@ -156,8 +148,7 @@ class _DisplayAreaState extends State<DisplayArea>
 
     return AnimatedContainer(
       duration: Duration(
-        milliseconds:
-            _isDragging || (_animationController?.isAnimating ?? false)
+        milliseconds: _isDragging || _animationController!.isAnimating
             ? 0
             : 300,
       ),
@@ -181,6 +172,7 @@ class _DisplayAreaState extends State<DisplayArea>
                 onVerticalDragEnd: _onVerticalDragEnd,
                 child: Stack(
                   children: [
+                    // Input view
                     Opacity(
                       opacity: progress <= 0.0
                           ? 1.0
@@ -199,11 +191,14 @@ class _DisplayAreaState extends State<DisplayArea>
                               input: widget.input,
                               onPlusOptionTap: widget.onPlusOptionTap,
                               onMinusOptionTap: widget.onMinusOptionTap,
+                              onTagsChanged: widget
+                                  .onTagsChanged, // ✅ forward tags callback
                             ),
                           ),
                         ),
                       ),
                     ),
+                    // History view
                     Opacity(
                       opacity: progress < 0.45
                           ? 0.0
@@ -246,20 +241,17 @@ class DragBar extends StatelessWidget {
   final GestureDragStartCallback? onVerticalDragStart;
   final GestureDragUpdateCallback? onVerticalDragUpdate;
   final GestureDragEndCallback? onVerticalDragEnd;
-  final Key? barKey;
 
   const DragBar({
     super.key,
     this.onVerticalDragStart,
     this.onVerticalDragUpdate,
     this.onVerticalDragEnd,
-    this.barKey,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      key: barKey,
       onVerticalDragStart: onVerticalDragStart,
       onVerticalDragUpdate: onVerticalDragUpdate,
       onVerticalDragEnd: onVerticalDragEnd,

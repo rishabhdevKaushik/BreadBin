@@ -181,14 +181,6 @@ class _HistoryAreaState extends State<HistoryArea> {
     return Container(
       margin: EdgeInsets.only(left: 8, right: 8),
       child: ListTile(
-        // leading: Icon(
-        //   txn.type == TransactionType.income
-        //       ? Icons.arrow_downward
-        //       : Icons.arrow_upward,
-        //   color: txn.type == TransactionType.income
-        //       ? AppTheme.income
-        //       : AppTheme.expense,
-        // ),
         title: Text(
           '${txn.type == TransactionType.income ? '+' : ''} ₹ ${txn.amount.toStringAsFixed(2)}',
           style: TextStyle(
