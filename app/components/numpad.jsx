@@ -1,8 +1,10 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useNumpadInput } from "../hooks/useNumpadInput";
 
 function Numpad({ theme }) {
+  const { handleButtonPress } = useNumpadInput();
   const numbers = [
     [1, 2, 3],
     [4, 5, 6],
@@ -10,9 +12,28 @@ function Numpad({ theme }) {
     [0, "."],
   ];
   const specialButtons = [
-    <Ionicons name="backspace" size={32} color="darkorange" />,
-    <Ionicons name="checkmark" size={32} color="lightgreen" />,
+    {
+      id: "backspace",
+      icon: (
+        <Ionicons
+          name="backspace"
+          size={32}
+          color={theme.currentTheme === "light" ? "#a64319ff" : "darkorange"}
+        />
+      ),
+    },
+    {
+      id: "checkmark",
+      icon: (
+        <Ionicons
+          name="checkmark"
+          size={32}
+          color={theme.currentTheme === "light" ? "#15be23ff" : "lightgreen"}
+        />
+      ),
+    },
   ];
+
   const styles = createStyles(theme);
 
   return (
@@ -29,7 +50,8 @@ function Numpad({ theme }) {
                       ? styles.button
                       : [styles.button, styles.zeroButton]
                   }
-                  onPress={() => {}}
+                  onPress={() => handleButtonPress(num)}
+                  // onPress={handleButtonPress}
                 >
                   <Text style={styles.buttonText}>{num}</Text>
                 </TouchableOpacity>
@@ -39,15 +61,17 @@ function Numpad({ theme }) {
         </View>
 
         <View style={styles.specialButtonsColumn}>
-          {specialButtons.map((icon, index) => (
+          {specialButtons.map((btn, index) => (
             <TouchableOpacity
-              key={index}
+              key={btn.id}
               style={
                 index !== 1 ? styles.button : [styles.button, styles.tickButton]
               }
-              onPress={() => {}}
+              onPress={() => {
+                handleButtonPress(btn.id);
+              }}
             >
-              {icon}
+              {btn.icon}
             </TouchableOpacity>
           ))}
         </View>
@@ -61,7 +85,9 @@ function createStyles(theme) {
     container: {
       padding: 20,
       alignItems: "center",
-      flex: 1,
+      width: "100%",
+      // height: "100%",
+      // flex: 1,
     },
     numpadRow: {
       flexDirection: "row",
@@ -90,9 +116,9 @@ function createStyles(theme) {
       justifyContent: "center",
     },
     buttonText: {
-      color: theme.text,
+      color: theme.buttonText,
       fontSize: 42,
-      fontWeight: "500",
+      fontWeight: 500,
     },
     zeroButton: {
       width: 72 * 2 + 10, // Twice width of button + gap

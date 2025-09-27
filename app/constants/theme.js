@@ -7,6 +7,9 @@ const Colors = {
   light: {
     text: "#11181C",
     background: "#FEEFD9",
+    backgroundLight: "#b09a79ff",
+    button: "#d2ab77ff",
+    buttonText: "#000000",
     tint: tintColorLight,
     icon: "#687076",
     tabIconDefault: "#687076",
@@ -15,7 +18,9 @@ const Colors = {
   dark: {
     text: "#F8F1E7",
     background: "#1E1B17",
+    backgroundLight: "#403830ff",
     button: "#4a3e2eff",
+    buttonText: "#F8F1E7",
     tint: tintColorDark,
     icon: "#4B4035",
     tabIconDefault: "#9BA1A6",

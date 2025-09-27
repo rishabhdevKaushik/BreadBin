@@ -1,22 +1,39 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Input from "./components/input";
 import Numpad from "./components/numpad";
-import Colors from "./constants/theme";
+import {
+  InputProvider,
+  InputTypeProvider,
+  TotalProvider,
+} from "./utils/contexts";
+import getTheme from "./utils/getTheme";
+// import (InputContext) from './utils/contexts'
 
 export default function home() {
-  const theme = Colors.dark;
+  const theme = getTheme();
+  // const inputTypes = inputTypes;
+
   const styles = createStyles(theme);
   return (
-    <View style={styles.container}>
-      <Input theme={theme} />
-      <Numpad theme={theme} />
-    </View>
+    <TotalProvider>
+      <InputProvider>
+        <InputTypeProvider>
+          <SafeAreaView style={styles.container}>
+            <Input theme={theme} />
+            <Numpad theme={theme} />
+          </SafeAreaView>
+        </InputTypeProvider>
+      </InputProvider>
+    </TotalProvider>
   );
 }
 
 function createStyles(theme) {
   return StyleSheet.create({
     container: {
+      // width: "100dvw",
+      // height: "100dvh",
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
