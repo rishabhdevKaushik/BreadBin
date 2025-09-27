@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/images/icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.breadbin.BreadBin"
     },
     "web": {
       "output": "static",
@@ -43,6 +44,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "bedabe77-3e78-4435-b34a-d51c74215096"
+      }
     }
   }
 }

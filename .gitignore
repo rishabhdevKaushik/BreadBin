@@ -45,3 +45,6 @@ app-example
 
 # vs-code settings
 .vscode
+
+# Builds
+eas.json
