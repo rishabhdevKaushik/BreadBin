@@ -1,18 +1,16 @@
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Input from "./components/input";
-import Numpad from "./components/numpad";
+import Input from "../components/input";
+import Numpad from "../components/numpad";
 import {
   InputProvider,
   InputTypeProvider,
   TotalProvider,
-} from "./utils/contexts";
-import getTheme from "./utils/getTheme";
-// import (InputContext) from './utils/contexts'
+} from "../utils/contexts";
+import getTheme from "../utils/getTheme";
 
 export default function home() {
   const theme = getTheme();
-  // const inputTypes = inputTypes;
 
   const styles = createStyles(theme);
   return (
