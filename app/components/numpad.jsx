@@ -1,14 +1,20 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useNumpadInput } from "../hooks/useNumpadInput";
 
 function Numpad({ theme }) {
   const { handleButtonPress } = useNumpadInput();
   const numbers = [
-    [1, 2, 3],
-    [4, 5, 6],
     [7, 8, 9],
+    [4, 5, 6],
+    [1, 2, 3],
     [0, "."],
   ];
   const specialButtons = [
@@ -81,13 +87,17 @@ function Numpad({ theme }) {
 }
 
 function createStyles(theme) {
+  const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } =
+    Dimensions.get("window");
   return StyleSheet.create({
     container: {
       padding: 20,
       alignItems: "center",
       width: "100%",
-      // height: "100%",
+      height: "48%",
       // flex: 1,
+      position: "absolute",
+      bottom: 0,
     },
     numpadRow: {
       flexDirection: "row",

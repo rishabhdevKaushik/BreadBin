@@ -1,7 +1,8 @@
 import { StyleSheet } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Input from "../components/input";
 import Numpad from "../components/numpad";
+import TopContainer from "../components/topContainer";
 import {
   InputProvider,
   InputTypeProvider,
@@ -17,9 +18,11 @@ export default function home() {
     <TotalProvider>
       <InputProvider>
         <InputTypeProvider>
-          <SafeAreaView style={styles.container}>
-            <Input theme={theme} />
-            <Numpad theme={theme} />
+          <SafeAreaView style={{ flex: 1 }}>
+            <GestureHandlerRootView style={styles.container}>
+              <TopContainer theme={theme} />
+              <Numpad theme={theme} />
+            </GestureHandlerRootView>
           </SafeAreaView>
         </InputTypeProvider>
       </InputProvider>
@@ -30,12 +33,13 @@ export default function home() {
 function createStyles(theme) {
   return StyleSheet.create({
     container: {
-      // width: "100dvw",
-      // height: "100dvh",
+      width: "100%",
+      height: "100%",
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
       backgroundColor: theme.background,
+      position: "relative",
     },
   });
 }

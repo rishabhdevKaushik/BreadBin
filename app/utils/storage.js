@@ -2,7 +2,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function changeToString(value) {
   if (typeof value !== "string"  && !(value instanceof String)) {
-    // console.log("change to string");
     return value.toString();
   } else {
     return value;

@@ -121,8 +121,6 @@ function Input({ theme }) {
           <AntDesign name="tags" size={20} color={theme.text} />
         </View>
       </View>
-
-      <AntDesign name="line" size={42} color={theme.text} />
     </View>
   );
 }
@@ -136,9 +134,9 @@ function createStyles(theme) {
       justifyContent: "space-between",
       flex: 1,
       width: "100%",
-      height: "100%",
-      borderBottomLeftRadius: 26,
-      borderBottomRightRadius: 26,
+      // height: "60",
+      // borderBottomLeftRadius: 26,
+      // borderBottomRightRadius: 26,
     },
     totalContainer: {
       width: "80%",
