@@ -128,15 +128,12 @@ function Input({ theme }) {
 function createStyles(theme) {
   return StyleSheet.create({
     container: {
-      backgroundColor: theme.backgroundLight,
+      // backgroundColor: theme.backgroundLight,
       paddingTop: 20,
       alignItems: "center",
       justifyContent: "space-between",
       flex: 1,
       width: "100%",
-      // height: "60",
-      // borderBottomLeftRadius: 26,
-      // borderBottomRightRadius: 26,
     },
     totalContainer: {
       width: "80%",
@@ -208,8 +205,8 @@ function createStyles(theme) {
     },
     popup: {
       position: "absolute",
-      top: 0, // adjust based on typePill size and spacing
-      left: 0,
+      bottom: 0, // adjust based on typePill size and spacing
+      // left: 48,
       backgroundColor: theme.button,
       borderRadius: 8,
       paddingVertical: 4,

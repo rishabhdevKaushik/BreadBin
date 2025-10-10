@@ -40,7 +40,7 @@ export function useNumpadInput() {
 
     if (inputType.type === "Income") {
       newTotal = (currentTotal + newInput).toString();
-      setInputType(inputTypes[0]);
+      setInputType(inputTypes[1]);
     } else {
       newTotal = (currentTotal - newInput).toString();
     }

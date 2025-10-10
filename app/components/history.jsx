@@ -20,7 +20,7 @@ function createStyles(theme) {
       zIndex: 10,
       flex: 1,
       width: "100%",
-      height: "100%",
+      // height: "100%",
     },
     text: {
       color: "white",

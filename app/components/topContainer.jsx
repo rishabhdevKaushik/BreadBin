@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
+  interpolate,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -10,35 +12,52 @@ import History from "./history";
 import Input from "./input";
 
 function TopContainer({ theme }) {
-  const [isExpanded, setIsExpanded] = useState(false);
   const styles = createStyles(theme);
+
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const { height: SCREEN_HEIGHT } = Dimensions.get("window");
   const COLLAPSED_HEIGHT = SCREEN_HEIGHT * 0.52;
   const EXPANDED_HEIGHT = SCREEN_HEIGHT * 0.96;
+  const midpoint = (COLLAPSED_HEIGHT + EXPANDED_HEIGHT) / 2;
   const heightValue = useSharedValue(COLLAPSED_HEIGHT);
-
-  useEffect(() => {
-    heightValue.value = withSpring(
-      isExpanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT
-    );
-  }, [isExpanded]);
+  const baseHeight = useSharedValue(COLLAPSED_HEIGHT);
 
   const gesture = Gesture.Pan()
-    .onUpdate((event) => {
-      // TODO: Add smooth scrolling
+    .onBegin(() => {
+      baseHeight.value = heightValue.value;
     })
-    .onEnd((event) => {
-      const velocityY = event.velocityY;
-      console.log(velocityY);
+    .onUpdate((event) => {
+      let newHeight = baseHeight.value + event.translationY;
+      heightValue.value = newHeight;
 
-      // On fast movement
-      if (velocityY > 500) {
-        setIsExpanded(true);
-        return;
-      } else if (velocityY < -500) {
-        setIsExpanded(false);
-        return;
+      // Determine expanded state based on midpoint crossing
+      const shouldBeExpanded = newHeight > midpoint;
+      // Update state if changed
+      if (shouldBeExpanded !== isExpanded) {
+        runOnJS(setIsExpanded)(shouldBeExpanded);
+      }
+    })
+    .onFinalize((event) => {
+      const velocityY = event.velocityY;
+      if (Math.abs(velocityY) > 500) {
+        // Snap on fast movement
+        if (velocityY > 0) {
+          runOnJS(setIsExpanded)(true);
+          heightValue.value = withSpring(EXPANDED_HEIGHT);
+        } else {
+          runOnJS(setIsExpanded)(false);
+          heightValue.value = withSpring(COLLAPSED_HEIGHT);
+        }
+      } else {
+        // Snap based on whether current height is past midpoint
+        if (heightValue.value > midpoint) {
+          runOnJS(setIsExpanded)(true);
+          heightValue.value = withSpring(EXPANDED_HEIGHT);
+        } else {
+          runOnJS(setIsExpanded)(false);
+          heightValue.value = withSpring(COLLAPSED_HEIGHT);
+        }
       }
     });
 
@@ -48,10 +67,39 @@ function TopContainer({ theme }) {
     };
   });
 
+  // Animated styles for fade
+  const inputAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      heightValue.value,
+      [COLLAPSED_HEIGHT, midpoint, EXPANDED_HEIGHT],
+      [1, 0.05, 0]
+    ),
+    // disable pointer events when invisible
+    pointerEvents: heightValue.value > midpoint ? "none" : "auto",
+  }));
+
+  const historyAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      heightValue.value,
+      [COLLAPSED_HEIGHT, midpoint, EXPANDED_HEIGHT],
+      [0, 0.05, 1]
+    ),
+    pointerEvents: heightValue.value > midpoint ? "auto" : "none",
+  }));
+
   return (
     <GestureDetector gesture={gesture}>
       <Animated.View style={[styles.container, animatedStyles]}>
-        {isExpanded ? <History theme={theme} /> : <Input theme={theme} />}
+        {isExpanded ? (
+          <Animated.View style={[{ flex: 1 }, historyAnimatedStyle]}>
+            <History theme={theme} />
+          </Animated.View>
+        ) : (
+          <Animated.View style={[{ flex: 1 }, inputAnimatedStyle]}>
+            <Input theme={theme} />
+          </Animated.View>
+        )}
+
         <View style={styles.line} />
       </Animated.View>
     </GestureDetector>
@@ -62,19 +110,14 @@ function createStyles(theme) {
   return StyleSheet.create({
     container: {
       backgroundColor: theme.backgroundLight,
-      // paddingTop: 20,
-      // alignItems: "center",
-      // flex: 1,
-      // alignSelf: "flex-start",
       justifyContent: "flex-end",
       width: "100%",
-      height: "52%",
       position: "absolute",
       top: 0,
       zIndex: 10,
-
       borderBottomLeftRadius: 26,
       borderBottomRightRadius: 26,
+      overflow: "hidden",
     },
     line: {
       width: 75,

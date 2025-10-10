@@ -48,7 +48,7 @@ export function useTotal() {
 const InputTypeContext = createContext();
 
 export function InputTypeProvider({ children }) {
-  const defaultInputType = inputTypes[0];
+  const defaultInputType = inputTypes[1];
   const [inputType, setInputType] = useState(defaultInputType);
 
   return (
