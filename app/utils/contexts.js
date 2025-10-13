@@ -61,3 +61,48 @@ export function InputTypeProvider({ children }) {
 export function useInputType() {
   return useContext(InputTypeContext);
 }
+
+// Transaction tags
+const TransactionTagsContext = createContext();
+
+export function TransactionTagsProvider({ children }) {
+  const defaultTransactionTags = [];
+  const [transactionTags, setTransactionTags] = useState(
+    defaultTransactionTags
+  );
+
+  return (
+    <TransactionTagsContext.Provider
+      value={{ transactionTags, setTransactionTags }}
+    >
+      {children}
+    </TransactionTagsContext.Provider>
+  );
+}
+
+export function useTransactionTags() {
+  return useContext(TransactionTagsContext);
+}
+
+// Transaction date-time
+const TransactionDateTimeContext = createContext();
+
+export function TransactionDateTimeProvider({ children }) {
+  const defaultTransactionDateTime = null;
+  const [transactionDateTime, setTransactionDateTime] = useState(
+    defaultTransactionDateTime
+  );
+
+  return (
+    <TransactionDateTimeContext.Provider
+      value={{ transactionDateTime, setTransactionDateTime }}
+    >
+      {children}
+    </TransactionDateTimeContext.Provider>
+  );
+}
+
+export function useTransactionDateTime() {
+  return useContext(TransactionDateTimeContext);
+}
+

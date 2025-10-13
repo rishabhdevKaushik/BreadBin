@@ -1,12 +1,23 @@
 import inputTypes from "../constants/inputType";
-import { useInput, useInputType, useTotal } from "../utils/contexts";
-import { getValue, setValue } from "../utils/storage";
+import {
+  useInput,
+  useInputType,
+  useTotal,
+  useTransactionDateTime,
+  useTransactionTags,
+} from "../utils/contexts";
+import { setValue } from "../utils/storage";
+import { addTransaction } from "../utils/transactions";
 
 export function useNumpadInput() {
-  let total = getValue("total") || "0";
+  // let total = getValue("total") || "0";
   const { totalAmount, setTotalAmount } = useTotal();
   const { inputAmount, setInputAmount } = useInput();
   const { inputType, setInputType } = useInputType();
+
+  const { transactionTags, setTransactionTags } = useTransactionTags();
+  const { transactionDateTime, setTransactionDateTime } =
+    useTransactionDateTime();
 
   function addNumberToInput(number) {
     if (number === ".") {
@@ -38,15 +49,27 @@ export function useNumpadInput() {
     const currentTotal = Number(totalAmount) || 0;
     let newTotal;
 
-    if (inputType.type === "Income") {
+    if (inputType.type === "earning") {
       newTotal = (currentTotal + newInput).toString();
       setInputType(inputTypes[1]);
     } else {
       newTotal = (currentTotal - newInput).toString();
     }
 
+    // Add transaction to log
+    const transaction = {
+      amount: inputAmount,
+      type: inputType.type,
+      datetime: transactionDateTime,
+      tags: transactionTags,
+    };
+    await addTransaction(transaction);
+
+    // Reset values
     setInputAmount("");
     setTotalAmount(newTotal);
+    setTransactionTags([]);
+    setTransactionDateTime(null);
 
     await setValue("total", newTotal);
   }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useRef, useState } from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -12,6 +12,7 @@ import History from "./history";
 import Input from "./input";
 
 function TopContainer({ theme }) {
+  const flatListGestureRef = useRef();
   const styles = createStyles(theme);
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -27,6 +28,7 @@ function TopContainer({ theme }) {
     .onBegin(() => {
       baseHeight.value = heightValue.value;
     })
+    .simultaneousWithExternalGesture(flatListGestureRef)
     .onUpdate((event) => {
       let newHeight = baseHeight.value + event.translationY;
       heightValue.value = newHeight;
@@ -92,7 +94,7 @@ function TopContainer({ theme }) {
       <Animated.View style={[styles.container, animatedStyles]}>
         {isExpanded ? (
           <Animated.View style={[{ flex: 1 }, historyAnimatedStyle]}>
-            <History theme={theme} />
+            <History theme={theme} parentGestureRef={flatListGestureRef} />
           </Animated.View>
         ) : (
           <Animated.View style={[{ flex: 1 }, inputAnimatedStyle]}>

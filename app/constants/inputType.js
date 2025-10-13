@@ -1,11 +1,11 @@
 const inputTypes = [
   {
     symbol: "+",
-    type: "Income",
+    type: "earning",
   },
   {
     symbol: "-",
-    type: "Expense",
+    type: "expense",
   },
 ];
 

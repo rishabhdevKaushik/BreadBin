@@ -7,6 +7,8 @@ import {
   InputProvider,
   InputTypeProvider,
   TotalProvider,
+  TransactionDateTimeProvider,
+  TransactionTagsProvider,
 } from "../utils/contexts";
 import getTheme from "../utils/getTheme";
 
@@ -18,12 +20,16 @@ export default function home() {
     <TotalProvider>
       <InputProvider>
         <InputTypeProvider>
-          <SafeAreaView style={{ flex: 1 }}>
-            <GestureHandlerRootView style={styles.container}>
-              <TopContainer theme={theme} />
-              <Numpad theme={theme} />
-            </GestureHandlerRootView>
-          </SafeAreaView>
+          <TransactionTagsProvider>
+            <TransactionDateTimeProvider>
+              <SafeAreaView style={{ flex: 1 }}>
+                <GestureHandlerRootView style={styles.container}>
+                  <TopContainer theme={theme} />
+                  <Numpad theme={theme} />
+                </GestureHandlerRootView>
+              </SafeAreaView>
+            </TransactionDateTimeProvider>
+          </TransactionTagsProvider>
         </InputTypeProvider>
       </InputProvider>
     </TotalProvider>

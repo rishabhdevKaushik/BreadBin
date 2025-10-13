@@ -6,6 +6,8 @@ import { Platform } from "react-native";
 const Colors = {
   light: {
     text: "#11181C",
+    textLight: "#3e4245ff",
+    earningText: "#37e203ff",
     background: "#403830ff",
     backgroundLight: "#FEEFD9",
     button: "#b09a79ff",
@@ -18,6 +20,8 @@ const Colors = {
   },
   dark: {
     text: "#F8F1E7",
+    textLight: "#a59e94ff",
+    earningText: "#37e203ff",
     background: "#1E1B17",
     backgroundLight: "#403830ff",
     button: "#4a3e2eff",

@@ -109,7 +109,8 @@ function Input({ theme }) {
                   onPress={() => onSelectType(item)}
                 >
                   <Text style={styles.popupItemText}>
-                    {item.symbol} {item.type}
+                    {item.symbol}{" "}
+                    {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
                   </Text>
                 </TouchableOpacity>
               )}
