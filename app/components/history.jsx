@@ -1,16 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { getTransactions } from "../utils/transactions";
-import { NativeViewGestureHandler } from "react-native-gesture-handler";
+import Animated, { useAnimatedScrollHandler } from "react-native-reanimated";
 
-function History({ theme, parentGestureRef }) {
+function History({ theme, parentGestureRef, scrollY }) {
   const styles = createStyles(theme);
   const [logs, setLogs] = useState([]);
-
   const flatListRef = useRef(null);
-  const flatListGestureRef = useRef(null);
-  // const nativeGesture =
-  //   Gesture.Native().simultaneousWithExternalGesture(parentGestureRef);
 
   useEffect(() => {
     async function fetchTransactions() {
@@ -31,6 +28,14 @@ function History({ theme, parentGestureRef }) {
     fetchTransactions();
   }, []);
 
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y; // share scroll position with parent
+    },
+  });
+
+  const nativeScroll = Gesture.Native().blocksExternalGesture(parentGestureRef);
+
   function getTime(datetime) {
     const date = new Date(datetime);
     let hours = date.getHours();
@@ -46,16 +51,16 @@ function History({ theme, parentGestureRef }) {
     flatListRef.current?.scrollToBegin({ animated: shouldAnimate });
   }
 
+
   return (
     <View style={styles.container}>
-      <NativeViewGestureHandler
-        ref={flatListGestureRef}
-        waitFor={parentGestureRef}
-      >
-        <FlatList
-          ref={flatListRef}
+      <GestureDetector gesture={nativeScroll}>
+        <Animated.FlatList
           inverted={true}
+          ref={flatListRef}
           data={logs}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
             <View style={styles.transaction}>
@@ -83,7 +88,7 @@ function History({ theme, parentGestureRef }) {
           )}
           // onContentSizeChange={() => scrollToEnd(true)}
         />
-      </NativeViewGestureHandler>
+      </GestureDetector>
     </View>
   );
 }

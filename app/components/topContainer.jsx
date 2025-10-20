@@ -12,24 +12,30 @@ import History from "./history";
 import Input from "./input";
 
 function TopContainer({ theme }) {
-  const flatListGestureRef = useRef();
+  const gestureRef = useRef();
   const styles = createStyles(theme);
 
   const [isExpanded, setIsExpanded] = useState(false);
 
   const { height: SCREEN_HEIGHT } = Dimensions.get("window");
   const COLLAPSED_HEIGHT = SCREEN_HEIGHT * 0.52;
-  const EXPANDED_HEIGHT = SCREEN_HEIGHT * 0.96;
+  const EXPANDED_HEIGHT = SCREEN_HEIGHT * 0.92;
   const midpoint = (COLLAPSED_HEIGHT + EXPANDED_HEIGHT) / 2;
+    // animation values
   const heightValue = useSharedValue(COLLAPSED_HEIGHT);
   const baseHeight = useSharedValue(COLLAPSED_HEIGHT);
 
-  const gesture = Gesture.Pan()
+    // scroll position (shared with child)
+  const scrollY = useSharedValue(0);
+
+  const parentGesture = Gesture.Pan()
     .onBegin(() => {
       baseHeight.value = heightValue.value;
     })
-    .simultaneousWithExternalGesture(flatListGestureRef)
     .onUpdate((event) => {
+          // ✅ Only allow dragging when the FlatList is scrolled to top
+      if (scrollY.value <= 0) {
+
       let newHeight = baseHeight.value + event.translationY;
       heightValue.value = newHeight;
 
@@ -39,8 +45,11 @@ function TopContainer({ theme }) {
       if (shouldBeExpanded !== isExpanded) {
         runOnJS(setIsExpanded)(shouldBeExpanded);
       }
+    }
     })
     .onFinalize((event) => {
+            // ✅ Only finalize when scroll is at top (avoid conflict)
+      if (scrollY.value <= 0) {
       const velocityY = event.velocityY;
       if (Math.abs(velocityY) > 500) {
         // Snap on fast movement
@@ -60,16 +69,17 @@ function TopContainer({ theme }) {
           runOnJS(setIsExpanded)(false);
           heightValue.value = withSpring(COLLAPSED_HEIGHT);
         }
-      }
-    });
+      }}
+    }).withRef(gestureRef); ;
 
+  // height animation
   const animatedStyles = useAnimatedStyle(() => {
     return {
       height: heightValue.value,
     };
   });
 
-  // Animated styles for fade
+  // Fade Input/History
   const inputAnimatedStyle = useAnimatedStyle(() => ({
     opacity: interpolate(
       heightValue.value,
@@ -89,12 +99,13 @@ function TopContainer({ theme }) {
     pointerEvents: heightValue.value > midpoint ? "auto" : "none",
   }));
 
+
   return (
-    <GestureDetector gesture={gesture}>
+    <GestureDetector gesture={parentGesture}>
       <Animated.View style={[styles.container, animatedStyles]}>
         {isExpanded ? (
           <Animated.View style={[{ flex: 1 }, historyAnimatedStyle]}>
-            <History theme={theme} parentGestureRef={flatListGestureRef} />
+            <History theme={theme} parentGestureRef={gestureRef} scrollY={scrollY}/>
           </Animated.View>
         ) : (
           <Animated.View style={[{ flex: 1 }, inputAnimatedStyle]}>
