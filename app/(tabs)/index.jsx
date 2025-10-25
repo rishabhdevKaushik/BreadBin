@@ -1,13 +1,7 @@
 import { StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  InputProvider,
-  InputTypeProvider,
-  TotalProvider,
-  TransactionDateTimeProvider,
-  TransactionTagsProvider,
-} from "../../src/utils/contexts";
+import { TransactionProvider } from "../../src/utils/contexts";
 import getTheme from "../../src/utils/getTheme";
 import Numpad from "../components/numpad";
 import TopContainer from "../components/topContainer";
@@ -17,22 +11,14 @@ export default function home() {
 
   const styles = createStyles(theme);
   return (
-    <TotalProvider>
-      <InputProvider>
-        <InputTypeProvider>
-          <TransactionTagsProvider>
-            <TransactionDateTimeProvider>
-              <SafeAreaView style={{ flex: 1 }}>
-                <GestureHandlerRootView style={styles.container}>
-                  <TopContainer theme={theme} />
-                  <Numpad theme={theme} />
-                </GestureHandlerRootView>
-              </SafeAreaView>
-            </TransactionDateTimeProvider>
-          </TransactionTagsProvider>
-        </InputTypeProvider>
-      </InputProvider>
-    </TotalProvider>
+    <TransactionProvider>
+      <SafeAreaView style={{ flex: 1 }}>
+        <GestureHandlerRootView style={styles.container}>
+          <TopContainer theme={theme} />
+          <Numpad theme={theme} />
+        </GestureHandlerRootView>
+      </SafeAreaView>
+    </TransactionProvider>
   );
 }
 

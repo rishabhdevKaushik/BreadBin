@@ -2,28 +2,14 @@ import { createContext, useContext, useEffect, useState } from "react";
 import inputTypes from "../constants/inputType";
 import { getValue } from "./storage";
 
-// Input Amount
-const InputContext = createContext();
+const TransactionContext = createContext();
 
-export function InputProvider({ children }) {
+export function TransactionProvider({ children }) {
   const [inputAmount, setInputAmount] = useState("");
-
-  return (
-    <InputContext.Provider value={{ inputAmount, setInputAmount }}>
-      {children}
-    </InputContext.Provider>
-  );
-}
-
-export function useInput() {
-  return useContext(InputContext);
-}
-
-// Total Amount
-const TotalContext = createContext();
-
-export function TotalProvider({ children }) {
   const [totalAmount, setTotalAmount] = useState();
+  const [inputType, setInputType] = useState(inputTypes[1]);
+  const [transactionTags, setTransactionTags] = useState([]);
+  const [transactionDateTime, setTransactionDateTime] = useState(null);
 
   useEffect(() => {
     async function fetchTotal() {
@@ -33,76 +19,57 @@ export function TotalProvider({ children }) {
     fetchTotal();
   }, []);
 
+  const value = {
+    inputAmount,
+    setInputAmount,
+    totalAmount,
+    setTotalAmount,
+    inputType,
+    setInputType,
+    transactionTags,
+    setTransactionTags,
+    transactionDateTime,
+    setTransactionDateTime,
+  };
+
   return (
-    <TotalContext.Provider value={{ totalAmount, setTotalAmount }}>
+    <TransactionContext.Provider value={value}>
       {children}
-    </TotalContext.Provider>
+    </TransactionContext.Provider>
   );
+}
+
+// Custom hook to use the transaction context
+export function useTransaction() {
+  const context = useContext(TransactionContext);
+  if (!context) {
+    throw new Error("useTransaction must be used within a TransactionProvider");
+  }
+  return context;
+}
+
+// Optional: Individual hooks for cleaner access
+export function useInput() {
+  const { inputAmount, setInputAmount } = useTransaction();
+  return { inputAmount, setInputAmount };
 }
 
 export function useTotal() {
-  return useContext(TotalContext);
-}
-
-// Input Type
-const InputTypeContext = createContext();
-
-export function InputTypeProvider({ children }) {
-  const defaultInputType = inputTypes[1];
-  const [inputType, setInputType] = useState(defaultInputType);
-
-  return (
-    <InputTypeContext.Provider value={{ inputType, setInputType }}>
-      {children}
-    </InputTypeContext.Provider>
-  );
+  const { totalAmount, setTotalAmount } = useTransaction();
+  return { totalAmount, setTotalAmount };
 }
 
 export function useInputType() {
-  return useContext(InputTypeContext);
-}
-
-// Transaction tags
-const TransactionTagsContext = createContext();
-
-export function TransactionTagsProvider({ children }) {
-  const defaultTransactionTags = [];
-  const [transactionTags, setTransactionTags] = useState(
-    defaultTransactionTags
-  );
-
-  return (
-    <TransactionTagsContext.Provider
-      value={{ transactionTags, setTransactionTags }}
-    >
-      {children}
-    </TransactionTagsContext.Provider>
-  );
+  const { inputType, setInputType } = useTransaction();
+  return { inputType, setInputType };
 }
 
 export function useTransactionTags() {
-  return useContext(TransactionTagsContext);
-}
-
-// Transaction date-time
-const TransactionDateTimeContext = createContext();
-
-export function TransactionDateTimeProvider({ children }) {
-  const defaultTransactionDateTime = null;
-  const [transactionDateTime, setTransactionDateTime] = useState(
-    defaultTransactionDateTime
-  );
-
-  return (
-    <TransactionDateTimeContext.Provider
-      value={{ transactionDateTime, setTransactionDateTime }}
-    >
-      {children}
-    </TransactionDateTimeContext.Provider>
-  );
+  const { transactionTags, setTransactionTags } = useTransaction();
+  return { transactionTags, setTransactionTags };
 }
 
 export function useTransactionDateTime() {
-  return useContext(TransactionDateTimeContext);
+  const { transactionDateTime, setTransactionDateTime } = useTransaction();
+  return { transactionDateTime, setTransactionDateTime };
 }
-

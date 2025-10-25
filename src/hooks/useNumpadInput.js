@@ -1,23 +1,23 @@
 import inputTypes from "../constants/inputType";
 import {
-  useInput,
-  useInputType,
-  useTotal,
-  useTransactionDateTime,
-  useTransactionTags,
+  useTransaction,
 } from "../utils/contexts";
 import { setValue } from "../utils/storage";
 import { addTransaction } from "../utils/transactions";
 
 export function useNumpadInput() {
-  // let total = getValue("total") || "0";
-  const { totalAmount, setTotalAmount } = useTotal();
-  const { inputAmount, setInputAmount } = useInput();
-  const { inputType, setInputType } = useInputType();
-
-  const { transactionTags, setTransactionTags } = useTransactionTags();
-  const { transactionDateTime, setTransactionDateTime } =
-    useTransactionDateTime();
+    const {
+    totalAmount,
+    setTotalAmount,
+    inputAmount,
+    setInputAmount,
+    inputType,
+    setInputType,
+    transactionTags,
+    setTransactionTags,
+    transactionDateTime,
+    setTransactionDateTime,
+  } = useTransaction();
 
   function addNumberToInput(number) {
     if (number === ".") {
