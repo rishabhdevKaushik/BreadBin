@@ -10,16 +10,81 @@ import {
   View,
 } from "react-native";
 import inputTypes from "../../src/constants/inputType";
-import { useInput, useInputType, useTotal } from "../../src/utils/contexts";
+import {
+  useInput,
+  useInputType,
+  useTotal,
+  useTransactionDateTime,
+} from "../../src/utils/contexts";
+
+import RNDateTimePicker from "@react-native-community/datetimepicker";
 
 function Input({ theme }) {
   const styles = createStyles(theme);
   const { inputType, setInputType } = useInputType();
   const { totalAmount } = useTotal();
   const { inputAmount } = useInput();
+  const { transactionDateTime, setTransactionDateTime } =
+    useTransactionDateTime();
 
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const animation = useRef(new Animated.Value(0)).current;
+
+  // Add state for time/date pickers
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedTime, setSelectedTime] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  // Update handlers
+  function handleTimePicker() {
+    setShowTimePicker(true);
+  }
+
+  function handleDatePicker() {
+    setShowDatePicker(true);
+  }
+
+  // Add onChange handlers
+  const onTimeChange = (event, time) => {
+    setShowTimePicker(false);
+    if (event.type === "set" && time) {
+      setSelectedTime(time);
+      if (!transactionDateTime) {
+        setTransactionDateTime(time);
+      } else {
+        // Update only time
+        const updatedDateTime = new Date(transactionDateTime);
+        updatedDateTime.setHours(time.getHours());
+        updatedDateTime.setMinutes(time.getMinutes());
+        updatedDateTime.setSeconds(time.getSeconds());
+        updatedDateTime.setMilliseconds(time.getMilliseconds());
+
+        setTransactionDateTime(updatedDateTime);
+        console.log("Final Date Time :", transactionDateTime);
+      }
+    }
+  };
+
+  const onDateChange = (event, date) => {
+    setShowDatePicker(false);
+    if (event.type === "set" && date) {
+      setSelectedDate(date);
+      if (!transactionDateTime) {
+        setTransactionDateTime(date);
+      } else {
+        // Update only date
+        const updatedDateTime = new Date(date);
+        updatedDateTime.setHours(transactionDateTime.getHours());
+        updatedDateTime.setMinutes(transactionDateTime.getMinutes());
+        updatedDateTime.setSeconds(transactionDateTime.getSeconds());
+        updatedDateTime.setMilliseconds(transactionDateTime.getMilliseconds());
+
+        setTransactionDateTime(updatedDateTime);
+        console.log("Final Date Time :", transactionDateTime);
+      }
+    }
+  };
 
   const togglePopup = () => {
     const toValue = isPopupVisible ? 0 : 1;
@@ -66,9 +131,32 @@ function Input({ theme }) {
 
       {/* Select time and date */}
       <View style={styles.setDateTime}>
-        <AntDesign name="clock-circle" size={24} color={theme.text} />
-        <FontAwesome6 name="calendar" size={24} color={theme.text} />
+        <TouchableOpacity onPress={handleTimePicker}>
+          <AntDesign name="clock-circle" size={24} color={theme.text} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleDatePicker}>
+          <FontAwesome6 name="calendar" size={24} color={theme.text} />
+        </TouchableOpacity>
       </View>
+
+      {/* Render pickers conditionally */}
+      {showTimePicker && (
+        <RNDateTimePicker
+          mode="time"
+          display="clock"
+          value={selectedTime}
+          onChange={onTimeChange}
+        />
+      )}
+
+      {showDatePicker && (
+        <RNDateTimePicker
+          mode="date"
+          display="default"
+          value={selectedDate}
+          onChange={onDateChange}
+        />
+      )}
 
       {/* Input number */}
       <View style={styles.input}>
