@@ -9,8 +9,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import inputTypes from "../constants/inputType";
-import { useInput, useInputType, useTotal } from "../utils/contexts";
+import inputTypes from "../../src/constants/inputType";
+import { useInput, useInputType, useTotal } from "../../src/utils/contexts";
 
 function Input({ theme }) {
   const styles = createStyles(theme);

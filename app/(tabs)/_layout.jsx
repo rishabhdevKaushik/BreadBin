@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import getTheme from "../utils/getTheme";
+import getTheme from "../../src/utils/getTheme";
 
 {
   /* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */

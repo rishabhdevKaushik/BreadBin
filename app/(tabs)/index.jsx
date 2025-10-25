@@ -1,16 +1,16 @@
 import { StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Numpad from "../components/numpad";
-import TopContainer from "../components/topContainer";
 import {
   InputProvider,
   InputTypeProvider,
   TotalProvider,
   TransactionDateTimeProvider,
   TransactionTagsProvider,
-} from "../utils/contexts";
-import getTheme from "../utils/getTheme";
+} from "../../src/utils/contexts";
+import getTheme from "../../src/utils/getTheme";
+import Numpad from "../components/numpad";
+import TopContainer from "../components/topContainer";
 
 export default function home() {
   const theme = getTheme();

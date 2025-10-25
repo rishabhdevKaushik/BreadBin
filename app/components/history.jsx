@@ -7,7 +7,7 @@ import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
-import { getTransactions } from "../utils/transactions";
+import { getTransactions } from "../../src/utils/transactions";
 
 function getTime(datetime) {
   const date = new Date(datetime);

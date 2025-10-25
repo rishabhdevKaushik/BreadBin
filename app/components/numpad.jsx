@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useNumpadInput } from "../hooks/useNumpadInput";
+import { useNumpadInput } from "../../src/hooks/useNumpadInput";
 
 function Numpad({ theme }) {
   const { handleButtonPress } = useNumpadInput();
